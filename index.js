@@ -88,31 +88,6 @@ console.log("Starting mining of block 2 with Bob as miner");
 BLOCKCHAIN.minePendingTransaction(BobsWallet.publicKey);
 console.log("-----------------------------------------------\n");
 
-// Transaction 3
-// Transfer 100 coins from Bob to Alice;
-console.log(
-  "Balance of Alice's wallet: " +
-    BLOCKCHAIN.getBalanceOfAddress(AlicesWallet.publicKey) +
-    "\n",
-);
-console.log(
-  "Balance of Bob's wallet: " +
-    BLOCKCHAIN.getBalanceOfAddress(BobsWallet.publicKey) +
-    "\n",
-);
-console.log("Bob transfers 20 coins to Alice\n");
-const tx3 = new Transaction(BobsWallet.publicKey, AlicesWallet.publicKey, 20);
-// Bob signs the txn
-tx3.signTransaction(BobsWallet.keyPair);
-// submit the transaction
-BLOCKCHAIN.addTransaction(tx3);
-console.log("\n-----------------------------------------------\n");
-// mine the third block;
-// miner is Alice;
-console.log("Starting mining of block 3 with Alice as miner");
-BLOCKCHAIN.minePendingTransaction(AlicesWallet.publicKey);
-console.log("-----------------------------------------------\n");
-
 // get balance of Alice's Wallet
 console.log(
   "Balance of Alice's wallet: " +
