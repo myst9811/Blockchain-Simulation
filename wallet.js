@@ -1,4 +1,5 @@
-import { ec as EC } from "elliptic";
+import elliptic from "elliptic";
+const { ec: EC } = elliptic;
 
 const ec = new EC("secp256k1");
 

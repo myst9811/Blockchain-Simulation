@@ -1,6 +1,6 @@
-import Blockchain from "./blockchain";
-import Transaction from "./transaction";
-import { createWallet, validateWallet } from "./wallet";
+import Blockchain from "./blockchain.js";
+import Transaction from "./transaction.js";
+import { createWallet, validateWallet } from "./wallet.js";
 
 // initialize the blockchain --> creates the genesis block
 console.log("Initializing Blockchain...");

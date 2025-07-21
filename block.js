@@ -1,4 +1,6 @@
-const SHA256 = require("crypto-js/sha256");
+import sha256 from "crypto-js/sha256.js";
+
+const SHA256 = sha256;
 
 export default class Block {
   constructor(timestamp, transactions, previousHash = "") {

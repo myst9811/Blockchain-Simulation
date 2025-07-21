@@ -1,6 +1,5 @@
-const Block = require("./block");
-const Blockchain = require("./blockchain");
-const Transaction = require('./transaction')
+import Block from "./block.js";
+import Transaction from "./transaction.js";
 
 export default class Blockchain {
   constructor() {
@@ -11,7 +10,7 @@ export default class Blockchain {
   }
 
   createGenesisBlock() {
-    return new Block(Data.now(), [], "");
+    return new Block(Date.now(), [], "");
   }
 
   getHeight() {
@@ -49,21 +48,21 @@ export default class Blockchain {
     block.mineBlock(this.difficulty);
     console.log("Block mined successfully");
     this.chain.push(block);
-    
-    // reward validator 
+
+    // reward validator
     this.pendingTransactions = [
-      new Transaction(null, miningRewardAddress, this.miningReward);
-    ]
+      new Transaction(null, miningRewardAddress, this.miningReward),
+    ];
   }
-  
-  getBalanceOfAddress(address){
+
+  getBalanceOfAddress(address) {
     let balance = 0;
-    for(const block of this.chain){
-      for(const transaction of block.transactions){
-        if(transaction.fromAddress === address){
+    for (const block of this.chain) {
+      for (const transaction of block.transactions) {
+        if (transaction.fromAddress === address) {
           balance -= transaction.amount;
         }
-        if(transaction.toAddress === address){
+        if (transaction.toAddress === address) {
           balance += transaction.amount;
         }
       }
@@ -71,21 +70,26 @@ export default class Blockchain {
     return balance;
   }
 
-  isChainValid(){
-    for(let i=1; i<this.chain.length; i++){
+  isChainValid() {
+    for (let i = 1; i < this.chain.length; i++) {
       const currentBlock = this.chain[i];
-      const previousHash = this.chain[i-1];
-      if(!currentBlock.hasValidTransactions()){
+      const previousBlock = this.chain[i - 1];
+      if (!currentBlock.hasValidTransactions()) {
         return false;
       }
 
-      if(currentBlock.hash !== currentBlock.calculateHash()){
-        console.log("Hash not valid for block: " + JSON.stringify(currentBlock));
+      if (currentBlock.hash !== currentBlock.calculateHash()) {
+        console.log(
+          "Hash not valid for block: " + JSON.stringify(currentBlock),
+        );
         return false;
       }
 
-      if(currentBlock.previousHash !== previousBlock.calculateHash()){
-        console.log("Previous block hash is not valid for block: " + JSON.stringify(currentBlock));
+      if (currentBlock.previousHash !== previousBlock.calculateHash()) {
+        console.log(
+          "Previous block hash is not valid for block: " +
+            JSON.stringify(currentBlock),
+        );
         return false;
       }
     }
