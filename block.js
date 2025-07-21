@@ -1,5 +1,4 @@
 import sha256 from "crypto-js/sha256.js";
-import Blockchain from "./blockchain.js";
 
 const SHA256 = sha256;
 
