@@ -1,5 +1,6 @@
 import Block from "./block.js";
 import Transaction from "./transaction.js";
+import ProofOfWork from "./proofofwork.js";
 
 export default class Blockchain {
   constructor() {
@@ -7,6 +8,7 @@ export default class Blockchain {
     this.difficulty = 3;
     this.pendingTransactions = [];
     this.miningReward = 100;
+    this.registeredWallets = [];
   }
 
   createGenesisBlock() {
@@ -19,6 +21,13 @@ export default class Blockchain {
 
   getBlock(height) {
     return this.chain[height];
+  }
+
+  registerWallet(publicKey) {
+    if (!this.registeredWallets.includes(publicKey)) {
+      this.registeredWallets.push(publicKey);
+      console.log(`✅ Wallet registered: ${publicKey.substring(0, 15)}...`);
+    }
   }
 
   addTransaction(transaction) {
@@ -34,24 +43,85 @@ export default class Blockchain {
     this.pendingTransactions.push(transaction);
   }
 
-  minePendingTransaction(miningRewardAddress) {
-    // package pending txn in same block;
+  mineCandidateBlock(miningRewardAddress) {
     const latestBlock = this.getBlock(this.getHeight());
 
-    let block = new Block(
-      Date.now(),
-      this.pendingTransactions,
-      latestBlock.hash,
+    const rewardTx = new Transaction(
+      null,
+      miningRewardAddress,
+      this.miningReward,
     );
 
-    // mine constantly.
-    block.mineBlock(this.difficulty, this.getHeight());
-    this.chain.push(block);
+    const transactionsToMine = [...this.pendingTransactions, rewardTx];
 
-    // reward validator
-    this.pendingTransactions = [
-      new Transaction(null, miningRewardAddress, this.miningReward),
-    ];
+    let block = new Block(Date.now(), transactionsToMine, latestBlock.hash);
+
+    const pow = new ProofOfWork(block);
+    const { nonce, hash } = pow.run(this.difficulty, this.getHeight());
+
+    block.nonce = nonce;
+    block.hash = hash;
+
+    return block;
+  }
+
+  addBlock(newBlock, minerPublicKey) {
+    let approvalCount = 0;
+    const requiredApprovals = this.registeredWallets.length - 1;
+
+    if (requiredApprovals <= 0) {
+      throw new Error("Not enough registered wallets to reach consensus.");
+    }
+
+    console.log("\n📡 Block submitted for network consensus...");
+
+    // Every wallet except the miner must verify the block
+    for (const verifierPublicKey of this.registeredWallets) {
+      if (verifierPublicKey === minerPublicKey) {
+        continue; // The miner doesn't need to self-verify
+      }
+
+      console.log(
+        `🧐 Wallet ${verifierPublicKey.substring(0, 10)}... is verifying the block...`,
+      );
+
+      // We perform the standard validation checks for each verifier
+      const latestBlock = this.getBlock(this.getHeight());
+      const target = Array(this.difficulty + 1).join("0");
+
+      if (
+        newBlock.hash.substring(0, this.difficulty) === target &&
+        newBlock.hash === newBlock.calculateHash() &&
+        newBlock.previousHash === latestBlock.hash &&
+        newBlock.hasValidTransactions()
+      ) {
+        console.log(
+          `👍 Wallet ${verifierPublicKey.substring(0, 10)}... approved.`,
+        );
+        approvalCount++;
+      } else {
+        console.log(
+          `👎 Wallet ${verifierPublicKey.substring(0, 10)}... rejected.`,
+        );
+      }
+    }
+
+    console.log(
+      `\nResults: ${approvalCount} out of ${requiredApprovals} required approvals.`,
+    );
+
+    // Check if consensus was reached
+    if (approvalCount >= requiredApprovals) {
+      this.chain.push(newBlock);
+      this.pendingTransactions = [];
+      console.log(
+        "🎉 Consensus reached! Block successfully added to the chain.",
+      );
+      return true;
+    } else {
+      console.log("❌ Consensus not reached. Block rejected.");
+      return false;
+    }
   }
 
   getBalanceOfAddress(address) {

@@ -10,32 +10,28 @@ console.log("Contents of Blockchain after creating genesis block: \n");
 console.log(JSON.stringify(BLOCKCHAIN, null, 4));
 console.log("\n---------------------------------------------\n");
 
-// setup wallet for Alice and Bob;
-const BobsWallet = createWallet();
+console.log("Creating wallets for Alice, Bob, and Charlie...");
 const AlicesWallet = createWallet();
+const BobsWallet = createWallet();
+const CharliesWallet = createWallet();
 
-console.log("validating Bob's wallet....");
 console.log(
-  "Bob's wallet is valid: " +
+  "validating Bob's wallet... : " +
     validateWallet(BobsWallet.privateKey, BobsWallet.publicKey),
 );
 console.log(
-  "Balance of Alice's wallet: " +
-    BLOCKCHAIN.getBalanceOfAddress(AlicesWallet.publicKey) +
-    "\n",
+  "validating Charlie's wallet... : " +
+    validateWallet(CharliesWallet.privateKey, CharliesWallet.publicKey),
 );
-console.log("\n---------------------------------------------\n");
-
-console.log("validating Alice's wallet....");
 console.log(
-  "Alice's wallet is valid: " +
+  "validating Alicelice's wallet... : " +
     validateWallet(AlicesWallet.privateKey, AlicesWallet.publicKey),
 );
-console.log(
-  "Balance of Alice's wallet: " +
-    BLOCKCHAIN.getBalanceOfAddress(AlicesWallet.publicKey) +
-    "\n",
-);
+console.log("\n----------------------------------------------\n");
+
+BLOCKCHAIN.registerWallet(AlicesWallet.publicKey);
+BLOCKCHAIN.registerWallet(BobsWallet.publicKey);
+BLOCKCHAIN.registerWallet(CharliesWallet.publicKey);
 console.log("\n----------------------------------------------\n");
 
 // Transaction 1
@@ -57,11 +53,14 @@ tx1.signTransaction(BobsWallet.keyPair);
 // submit the transaction
 BLOCKCHAIN.addTransaction(tx1);
 console.log("\n-----------------------------------------------\n");
-// mine the first block;
-// miner is Alice;
-console.log("Starting mining of block 1 with Alice as miner");
-BLOCKCHAIN.minePendingTransaction(AlicesWallet.publicKey);
-console.log("-----------------------------------------------\n");
+// Alice mines the block containing tx1.
+console.log("⛏️ Alice, acting as the miner, starts working on a new block...");
+const solvedBlock1 = BLOCKCHAIN.mineCandidateBlock(AlicesWallet.publicKey);
+console.log("✅ Alice has solved the block and presents it for verification.");
+console.log("-----------------------------------------------");
+
+BLOCKCHAIN.addBlock(solvedBlock1, AlicesWallet.publicKey);
+console.log("\n-----------------------------------------------\n");
 
 // Transaction 2
 // Transfer 40 coins from Alice to Bob;
@@ -82,23 +81,28 @@ tx2.signTransaction(AlicesWallet.keyPair);
 // submit the transaction
 BLOCKCHAIN.addTransaction(tx2);
 console.log("\n-----------------------------------------------\n");
-// mine the second block
-// miner is Bob
-console.log("Starting mining of block 2 with Bob as miner");
-BLOCKCHAIN.minePendingTransaction(BobsWallet.publicKey);
-console.log("-----------------------------------------------\n");
+// Now, Bob mines the next block.
+console.log("⛏️ Bob, acting as the miner, starts working on a new block...");
+const solvedBlock2 = BLOCKCHAIN.mineCandidateBlock(BobsWallet.publicKey);
+console.log("✅ Bob has solved the block and it for verification.");
+console.log("-----------------------------------------------");
 
-// get balance of Alice's Wallet
+BLOCKCHAIN.addBlock(solvedBlock2, BobsWallet.publicKey);
+console.log("\n-----------------------------------------------\n");
+
+console.log("Final Balances:");
 console.log(
-  "Balance of Alice's wallet: " +
-    BLOCKCHAIN.getBalanceOfAddress(AlicesWallet.publicKey) +
-    "\n",
+  `  Alice's wallet: ${BLOCKCHAIN.getBalanceOfAddress(AlicesWallet.publicKey)}`,
 );
 console.log(
-  "Balance of Bob's wallet: " +
-    BLOCKCHAIN.getBalanceOfAddress(BobsWallet.publicKey) +
-    "\n",
+  `  Bob's wallet: ${BLOCKCHAIN.getBalanceOfAddress(BobsWallet.publicKey)}`,
 );
+console.log(
+  `  Charlie's wallet: ${BLOCKCHAIN.getBalanceOfAddress(
+    CharliesWallet.publicKey,
+  )}`,
+);
+console.log("\n-----------------------------------------------\n");
 
 // check if blockchain is valid:
 console.log("Validating chain...");
@@ -108,7 +112,7 @@ console.log("\n-----------------------------------------------\n");
 // manually alter data and revalidate;
 let balance = BLOCKCHAIN.chain[1].transactions[0].amount;
 BLOCKCHAIN.chain[1].transactions[0].amount = 200;
-console.log("Manually altered data in second block\n reverifying chain\n");
+console.log("Manually altered data in second block\nreverifying chain\n");
 
 // check if blockchain valid after tampering.
 console.log("Validating chain...");
@@ -119,4 +123,5 @@ console.log("\n-----------------------------------------------\n");
 BLOCKCHAIN.chain[1].transactions[0].amount = balance;
 
 // Print the whole blockchain
+console.log("Final blockchain state: \n");
 console.log(JSON.stringify(BLOCKCHAIN, null, 4));
