@@ -1,4 +1,5 @@
 import sha256 from "crypto-js/sha256.js";
+import Blockchain from "./blockchain.js";
 
 const SHA256 = sha256;
 
@@ -29,13 +30,20 @@ export default class Block {
     return true;
   }
 
-  mineBlock(difficulty) {
+  mineBlock(difficulty, height) {
     while (
       this.hash.substring(0, difficulty) !== Array(difficulty + 1).join("0")
     ) {
       this.nonce++;
       this.hash = this.calculateHash();
     }
-    console.log("Block mined, nonce: " + this.nonce + ", hash: " + this.hash);
+    console.log(
+      "Block " +
+        (height + 1) +
+        " mined, nonce: " +
+        this.nonce +
+        ", hash: " +
+        this.hash,
+    );
   }
 }

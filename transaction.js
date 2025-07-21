@@ -39,9 +39,6 @@ export default class Transaction {
     // transcode fromAddres to get public key
     const publicKey = ec.keyFromPublic(this.fromAddress, "hex");
 
-    // sign
-    console.log("Signature: " + this.signature);
-
     // verify if transaction was initiated by this public key, by verifying signature;
     return publicKey.verify(this.calculateHash(), this.signature);
   }

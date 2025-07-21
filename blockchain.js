@@ -45,8 +45,7 @@ export default class Blockchain {
     );
 
     // mine constantly.
-    block.mineBlock(this.difficulty);
-    console.log("Block mined successfully");
+    block.mineBlock(this.difficulty, this.getHeight());
     this.chain.push(block);
 
     // reward validator
