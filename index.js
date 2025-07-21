@@ -3,7 +3,11 @@ import Transaction from "./transaction";
 import { createWallet, validateWallet } from "./wallet";
 
 // initialize the blockchain --> creates the genesis block
+console.log("Initializing Blockchain...");
+console.log("Creating Genesis Block");
 const BLOCKCHAIN = new Blockchain();
+console.log("Contents of Blockchain");
+console.log(JSON.stringify(BLOCKCHAIN, null, 4));
 
 // setup wallet for Alice and Bob;
 const BobsWallet = createWallet();
