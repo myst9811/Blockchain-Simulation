@@ -78,14 +78,13 @@ export default class Blockchain {
     // Every wallet except the miner must verify the block
     for (const verifierPublicKey of this.registeredWallets) {
       if (verifierPublicKey === minerPublicKey) {
-        continue; // The miner doesn't need to self-verify
+        continue;
       }
 
       console.log(
         `🧐 Wallet ${verifierPublicKey.substring(0, 10)}... is verifying the block...`,
       );
 
-      // We perform the standard validation checks for each verifier
       const latestBlock = this.getBlock(this.getHeight());
       const target = Array(this.difficulty + 1).join("0");
 
@@ -110,7 +109,6 @@ export default class Blockchain {
       `\nResults: ${approvalCount} out of ${requiredApprovals} required approvals.`,
     );
 
-    // Check if consensus was reached
     if (approvalCount >= requiredApprovals) {
       this.chain.push(newBlock);
       this.pendingTransactions = [];
