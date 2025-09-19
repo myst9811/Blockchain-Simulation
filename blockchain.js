@@ -40,67 +40,71 @@ export default class Blockchain {
     this.pendingTransactions.push(transaction);
   }
 
-  mineCandidateBlock(miningRewardAddress) {
+mineCandidateBlock(miningRewardAddress) {
   const block = new Block(
     Date.now(),
     [...this.pendingTransactions, new Transaction(null, miningRewardAddress, this.miningReward)],
     this.getBlock(this.getHeight()).hash
   );
   
-  return new ProofOfWork(block).run(this.difficulty, this.getHeight());
+  // Mine the block and get the result
+  const miningResult = new ProofOfWork(block).run(this.difficulty, this.getHeight());
+  
+  // Update the block with the mining results
+  block.nonce = miningResult.nonce;
+  block.hash = miningResult.hash;
+  
+  // Return the complete block object
+  return block;
 }
 
-  addBlock(newBlock, minerPublicKey) {
-    const verifiers = [...this.registeredWallets].filter(
-      (wallet) => wallet !== minerPublicKey
-    );
-    const requiredApprovals = verifiers.length;
+ addBlock(newBlock, minerPublicKey) {
+  // Convert Set to Array before using filter
+  const verifiers = Array.from(this.registeredWallets).filter(wallet => wallet !== minerPublicKey);
+  
+  if (verifiers.length === 0) {
+    throw new Error("Not enough registered wallets to reach consensus.");
+  }
 
-    if (requiredApprovals === 0) {
-      throw new Error("Not enough registered wallets to reach consensus.");
-    }
-    console.log("\n📡 Block submitted for network consensus...");
-
-    const latestBlock = this.getBlock(this.getHeight());
-    const target = "0".repeat(this.difficulty);
-    let approvalCount = 0;
-
-    for (const verifierPublicKey of verifiers) {
-      console.log(
-        `🧐 Wallet ${verifierPublicKey.substring(0, 10)}... is verifying the block...`
-      );
-
-      if (
-        newBlock.hash.startsWith(target) &&
-        newBlock.hash === newBlock.calculateHash() &&
-        newBlock.previousHash === latestBlock.hash &&
-        newBlock.hasValidTransactions()
-      ) {
-        console.log(
-          `👍 Wallet ${verifierPublicKey.substring(0, 10)}... approved.`
-        );
-        approvalCount++;
-      } else {
-        console.log(
-          `👎 Wallet ${verifierPublicKey.substring(0, 10)}... rejected.`
-        );
-      }
-    }
-
-    console.log(
-      `\nResults: ${approvalCount} out of ${requiredApprovals} required approvals.`
-    );
-
-    if (approvalCount >= requiredApprovals) {
-      this.chain.push(newBlock);
-      this.pendingTransactions = [];
-      console.log("🎉 Consensus reached! Block successfully added to the chain.");
+  console.log("\n📡 Block submitted for network consensus...");
+  
+  const isValidBlock = this.validateBlock(newBlock);
+  const approvals = verifiers.filter(verifier => {
+    console.log(`🧐 Wallet ${verifier.substring(0, 10)}... is verifying...`);
+    
+    if (isValidBlock) {
+      console.log(`👍 Wallet ${verifier.substring(0, 10)}... approved.`);
       return true;
     } else {
-      console.log("❌ Consensus not reached. Block rejected.");
+      console.log(`👎 Wallet ${verifier.substring(0, 10)}... rejected.`);
       return false;
     }
+  }).length;
+
+  console.log(`\nResults: ${approvals} out of ${verifiers.length} required approvals.`);
+
+  if (approvals >= verifiers.length) {
+    this.chain.push(newBlock);
+    this.pendingTransactions = [];
+    console.log("🎉 Consensus reached! Block successfully added to the chain.");
+    return true;
+  } else {
+    console.log("❌ Consensus not reached. Block rejected.");
+    return false;
   }
+}
+// Helper method for block validation
+validateBlock(block) {
+  const latestBlock = this.getBlock(this.getHeight());
+  const target = "0".repeat(this.difficulty);
+  
+  return (
+    block.hash.startsWith(target) &&
+    block.hash === block.calculateHash() &&
+    block.previousHash === latestBlock.hash &&
+    block.hasValidTransactions()
+  );
+}
 
   getBalanceOfAddress(address) {
     let balance = 0;
