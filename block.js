@@ -16,7 +16,7 @@ export default class Block {
       this.previousHash +
         this.timestamp +
         JSON.stringify(this.transactions) +
-        this.nonce,
+        this.nonce
     ).toString();
   }
 
@@ -30,19 +30,14 @@ export default class Block {
   }
 
   mineBlock(difficulty, height) {
-    while (
-      this.hash.substring(0, difficulty) !== Array(difficulty + 1).join("0")
-    ) {
+    const target = "0".repeat(difficulty);
+
+    while (this.hash.substring(0, difficulty) !== target) {
       this.nonce++;
       this.hash = this.calculateHash();
     }
     console.log(
-      "Block " +
-        (height + 1) +
-        " mined, nonce: " +
-        this.nonce +
-        ", hash: " +
-        this.hash,
+      `Block ${height + 1} mined, nonce: ${this.nonce}, hash: ${this.hash}`
     );
   }
 }
