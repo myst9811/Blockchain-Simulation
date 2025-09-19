@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "crypto-js": "^4.2.0",
+    "crypto.js": "^3.3.4",
     "elliptic": "^6.6.1"
   },
   "devDependencies": {
