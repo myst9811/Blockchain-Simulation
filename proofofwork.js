@@ -7,17 +7,15 @@ export default class ProofOfWork {
   }
 
   run(difficulty, height) {
-    const target = Array(difficulty + 1).join("0");
+    const target = "0".repeat(difficulty);
     let nonce = 0;
-    let hash = "";
-
+    
     console.log("Mining new block...");
     while (true) {
       this.block.nonce = nonce;
+      const hash = this.block.calculateHash();
 
-      hash = this.block.calculateHash();
-
-      if (hash.substring(0, difficulty) === target) {
+      if (hash.startsWith(target)) {
         console.log(
           `Block ${height + 1} mined! Nonce: ${nonce}, Hash: ${hash}`,
         );
