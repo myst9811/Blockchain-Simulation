@@ -41,19 +41,14 @@ export default class Blockchain {
   }
 
   mineCandidateBlock(miningRewardAddress) {
-    const latestBlock = this.getBlock(this.getHeight());
-    const transactionsToMine = [
-      ...this.pendingTransactions,
-      new Transaction(null, miningRewardAddress, this.miningReward),
-    ];
-
-    const block = new Block(Date.now(), transactionsToMine, latestBlock.hash);
-    const pow = new ProofOfWork(block);
-    
-    // The ProofOfWork class now directly returns the mined block.
-    // The nonce and hash are updated inside the pow.run method.
-    return pow.run(this.difficulty, this.getHeight());
-  }
+  const block = new Block(
+    Date.now(),
+    [...this.pendingTransactions, new Transaction(null, miningRewardAddress, this.miningReward)],
+    this.getBlock(this.getHeight()).hash
+  );
+  
+  return new ProofOfWork(block).run(this.difficulty, this.getHeight());
+}
 
   addBlock(newBlock, minerPublicKey) {
     const verifiers = [...this.registeredWallets].filter(
