@@ -1,30 +1,97 @@
-# 🔗 Blockchain Simulation (JavaScript)
+# Blockchain Simulation
 
-A simple blockchain simulation built with **JavaScript**, demonstrating the core concepts of blockchain technology including blocks, transactions, proof of work, wallet registration, mining, consensus, and validation.
+A simple blockchain implementation in JavaScript demonstrating core blockchain concepts including blocks, transactions, proof of work, and consensus mechanisms.
 
----
+## Features
 
-## 📌 Features
+- **Genesis Block**: Automatically created first block
+- **Proof of Work**: Mining with adjustable difficulty
+- **Transactions**: Digital signatures and wallet transfers
+- **Mining Rewards**: Compensation for successful miners
+- **Consensus**: Network validation before adding blocks
+- **Chain Validation**: Tamper detection and integrity checks
+- **Balance Tracking**: Real-time wallet balance calculations
 
-- **Genesis Block**: Automatically created as the first block in the chain.
-- **Proof of Work (PoW)**: Simulates mining by finding a valid nonce to match difficulty.
-- **Transactions**: Transfer values between wallets with digital signatures.
-- **Mining Reward**: Miners receive rewards for successfully mining a block.
-- **Wallet Registration**: Nodes (wallets) must be registered to participate in consensus.
-- **Consensus Simulation**: Verifiers approve or reject blocks before adding them to the chain.
-- **Chain Validation**: Detects tampering in block data, hashes, or transactions.
-- **Balance Tracking**: Calculate balances of registered wallet addresses.
+## Installation
 
----
+```bash
+git clone <repository-url>
+cd blockchain-simulation
+npm install
+```
 
-## 📂 Project Structure
+## Usage
 
-project-root/
-│
-├── blockchain.js # Blockchain implementation
-├── block.js # Block structure and mining logic
-├── transaction.js # Transaction structure & validation (not shown here)
-├── proofofwork.js # Proof-of-work mining algorithm
-└── README.md # Documentation
+```javascript
+const Blockchain = require("./src/blockchain");
+const Transaction = require("./src/transaction");
 
----
+// Create blockchain
+const blockchain = new Blockchain();
+
+// Add transaction
+const transaction = new Transaction("alice", "bob", 50);
+blockchain.addTransaction(transaction);
+
+// Mine block
+blockchain.minePendingTransactions("miner1");
+
+// Check balance
+console.log("Alice balance:", blockchain.getBalance("alice"));
+```
+
+## Project Structure
+
+```
+├── src/
+│   ├── blockchain.js      # Main blockchain logic
+│   ├── block.js           # Block structure and mining
+│   ├── transaction.js     # Transaction handling
+│   ├── proofofwork.js     # Mining algorithm
+│   └── wallet.js          # Wallet management
+├── examples/              # Usage examples
+└── tests/                 # Test files
+```
+
+## API
+
+### Blockchain
+
+- `new Blockchain()` - Create new blockchain
+- `addTransaction(transaction)` - Add transaction to pending pool
+- `minePendingTransactions(miningRewardAddress)` - Mine new block
+- `getBalance(address)` - Get wallet balance
+- `isChainValid()` - Validate entire chain
+
+### Block
+
+- `new Block(timestamp, transactions, previousHash)` - Create block
+- `mineBlock(difficulty)` - Mine block with proof of work
+- `calculateHash()` - Calculate block hash
+
+### Transaction
+
+- `new Transaction(fromAddress, toAddress, amount)` - Create transaction
+- `calculateHash()` - Calculate transaction hash
+- `signTransaction(signingKey)` - Sign with private key
+- `isValid()` - Validate transaction
+
+## Testing
+
+```bash
+npm test
+```
+
+## Configuration
+
+```javascript
+// Adjust mining difficulty
+blockchain.difficulty = 4;
+
+// Set mining reward
+blockchain.miningReward = 100;
+```
+
+## License
+
+MIT License
